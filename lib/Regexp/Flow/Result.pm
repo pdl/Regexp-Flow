@@ -95,5 +95,6 @@ has re => (
 Regexp::Flow - which uses this module
 (also for author and copyright information)
 
+=cut
 
 1;
