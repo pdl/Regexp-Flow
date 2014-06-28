@@ -14,6 +14,21 @@ Regexp::Flow - flow control for using regular expression
 
 our $VERSION = '0.001';
 
+=head1 SYNOPSIS
+
+	use Regexp::Flow qw(re_matches re_substitutions);
+	...
+	my $m_results =
+	    re_matches ( $string, $re, $code, $flags );
+
+	my $s_results =
+	    re_substitutions ( $string, $re, $code, $flags );
+	....
+	foreach (@$m_results) {
+	    print $_->match; # assuming you used the /p flag
+	}
+
+
 =head1 FUNCTIONS
 
 =cut
@@ -179,6 +194,37 @@ sub re_substitutions {
 	$_[0] = $string if $results;
 	return $results;
 }
+
+=head1 SEE ALSO
+
+Regexp::Result - base class for information about a regexp match
+
+Regexp::Flow::Result - the class available within coderefs above
+
+Regexp::Flow::Results - the list of results returned by functions above
+
+=head1 BUGS
+
+Please report any bugs or feature requests to the github issues tracker
+at L<https://github.com/pdl/Regexp-Result/issues>. I will be notified,
+and then you'll automatically be notified of progress on your bug as I
+make changes.
+
+=head1 AUTHORS
+
+Daniel Perrett
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2012-2013 Daniel Perrett.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See L<http://dev.perl.org/licenses/> for more information.
+
+=cut
 
 1;
 
