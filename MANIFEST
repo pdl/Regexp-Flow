@@ -1,6 +1,7 @@
 Changes
 lib/Regexp/Flow.pm
 lib/Regexp/Flow/Result.pm
+lib/Regexp/Flow/Results.pm
 MANIFEST
 README
 t/flow.t
