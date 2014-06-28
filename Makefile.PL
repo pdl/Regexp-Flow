@@ -21,8 +21,9 @@ WriteMakefile(
     MIN_PERL_VERSION    => '5.010',
     PL_FILES            => {},
     PREREQ_PM => {
-        'Test::More' => 0,
+        'Test::More' => 0.96,
 	'Regexp::Result' => '0.002',
+	'Moo' => '0',
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Regexp-Flow-*' },
