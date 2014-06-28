@@ -1,0 +1,8 @@
+Changes
+lib/Regexp/Flow.pm
+lib/Regexp/Flow/Result.pm
+MANIFEST
+README
+t/flow.t
+Makefile.PL
+
