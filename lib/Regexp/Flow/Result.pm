@@ -6,7 +6,8 @@ use Moo;
 
 extends 'Regexp::Result';
 
-use overload '0+'=>sub{shift->success}; #~ for some reason \&success does not work here
+use overload
+	'0+'=>sub{shift->success}; #~ for some reason \&success does not work here
 
 has success => (
 	is => 'rw',

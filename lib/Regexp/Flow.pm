@@ -14,6 +14,10 @@ Regexp::Flow - flow control for using regular expression
 
 our $VERSION = '0.001';
 
+=head1 FUNCTIONS
+
+=cut
+
 =head3 re_matches
 
 	my $results = re_matches ( $string, $re, $code, $flags );
@@ -21,7 +25,7 @@ our $VERSION = '0.001';
 	say $_->prematch for re_matches('1.23', qr/\D/p,''); #?
 
 Finds all instances of C<$re> within C<string> and runs C<$code> each
-time a match is found. A L<Regexp:Flow::Result> object will be
+time a match is found. A M<Regexp:Flow::Result> object will be
 created and passed as the first argument to C<$code>.
 
 If C<$flags> is not present, C<g> will be assumed. If not, you must
@@ -29,7 +33,7 @@ include it yourself.
 
 If the third argument is a string, it will be used as the flags.
 Otherwise, it will be executed as a coderef on the
-L<Regexp::Flow::Result> object, i.e. C<< $code->($rfr) >>
+M<Regexp::Flow::Result> object, i.e. C<< $code->($rfr) >>
 
 Within C<$code>, you can call C<last> on C<$rfr> to stop executing
 C<$code> any more.
@@ -79,7 +83,7 @@ sub re_matches {
 
 	my $results;
 	if (defined wantarray) {
-		$results = Regexp::Flow::Result->new;
+		$results = Regexp::Flow::Results->new;
 	}
 	my $action = sub {
 	    	my $rfr = shift;
@@ -105,14 +109,14 @@ sub re_matches {
 	return $results;
 }
 
-=head3 re_replace
+=head3 re_substitutions
 
 	my $results = re_substitutions ( $string, $re, $code, $flags );
 	my $results = re_substitutions ( $string, $re, $code );
 	my $results = re_substitutions ( $string, $re, $string );
 	my $results = re_substitutions ( $string, $re );
 
-Finds all instances of C<$re> within C<string> and runs C<$code> each
+Finds all instances of C<$re> within C<$string> and runs C<$code> each
 time a match is found. A L<Regexp:Flow::Result> object will be
 created and passed as the first argument to C<$code>.
 The return value of C<$code> is used as the replacement for the
@@ -120,20 +124,21 @@ matched string. If a string is passed as the third argument, it
 (C<$string>) will be the replcement. Therefore B<do not> pass flags
 as the third argument.
 
+Just like C<s///>, this makes changes to the source string, unless
+the C<r> flag is present, in which case the source string will be
+untouched and the return value will be the modified string.
+
+If flags are not provided, C<g> is assumed.
 
 =cut
 
 sub re_substitutions {
-	my $string = shift;
-	my $re = shift;
-	my $code = shift;
-	my $flags = 'g';
+	my ($string, $re, $code, $flags) = @_; #~ we need to leave them in @_ to do in-place substitution
 	if (!ref $code) {
 		$code = sub {$code};
 	}
-	elsif (@_) {
-	    $flags = shift // $flags;
-	}
+	$flags //= 'g';
+	my $rflag = ($flags =~ /r/ ? 1 :0 );
 	my $results;
 	if (defined wantarray) {
 		$results = Regexp::Flow::Results->new;
@@ -148,7 +153,8 @@ sub re_substitutions {
 		$last = 1 if 'last' eq $rfr->continue_action;
 		$returnvalue;
 	};
-	die unless $flags =~ /^[a-z]+$/;
+	die ('Unexpected flags [a-z] only permitted in '.$flags)
+		unless $flags =~ /^[a-z]+$/;
 	#~ In the following code, We will be using s~~~e
 	eval qq`
 		\$string =~ s~\$re~
@@ -166,9 +172,12 @@ sub re_substitutions {
 	if ($@) {
 		warn ($@);
 	}
-	#$results->string_after( $string );
-	return $results, $string;
-	#~ really not sure about this return value
+	if ($rflag) {
+		return $string;
+	}
+	#~ implicit else
+	$_[0] = $string if $results;
+	return $results;
 }
 
 1;

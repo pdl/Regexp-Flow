@@ -3,7 +3,11 @@ use strict;
 use warnings;
 use Moo;
 
-use overload '0+' => \&count, bool => \&success;
+use overload
+	'0+' => \&count,
+	'@{}' => sub {shift->contents}, #~ not sure why, but \&contents dies
+	nomethod => \&count
+	;
 
 has contents => (
 	is => 'rw',

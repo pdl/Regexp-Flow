@@ -13,27 +13,27 @@ re_matches ('abcd', qr/\w/, sub{$count++; shift->last;});
 is($count,1, 'last works');
 
 $count = 0;
-re_matches ('abcd', qr/\w/, sub{
+my $results = re_matches ('abcd', qr/\w/, sub{
     $count++;
     my $rr = shift;
     $rr->last if $rr->match eq 'c';
 }, 'pg');
 is($count,3, 'flags works');
+ok ($results == 3, 'results numerically equals ok');
 };
 
 subtest substitutions => sub {
 
 my $count = 0;
 my $string = 'abcd';
-my $modified = re_substitutions ($string, qr/\w/, sub{
+my $results = re_substitutions ($string, qr/\w/, sub{
     $count++;
     my $rr = shift;
     $rr->last if $rr->match eq 'c';
     'x';
 }, 'pg');
-is($count,3, 'flags works');
-is($string, 'abcd', 'string not modified');
-is($modified, 'xxxd', 'modified string');
+is($count, 3, 'flags works');
+is($string, 'xxxd', 'modified string');
 
 };
 done_testing;
