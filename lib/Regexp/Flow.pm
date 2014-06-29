@@ -12,7 +12,7 @@ Regexp::Flow - flow control for using regular expression
 
 =cut
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 =head1 SYNOPSIS
 
