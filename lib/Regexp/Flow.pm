@@ -17,17 +17,23 @@ our $VERSION = '0.001';
 =head1 SYNOPSIS
 
 	use Regexp::Flow qw(re_matches re_substitutions);
+
 	...
+
 	my $m_results =
 	    re_matches ( $string, $re, $code, $flags );
 
 	my $s_results =
 	    re_substitutions ( $string, $re, $code, $flags );
-	....
+
+	...
+
 	foreach (@$m_results) {
 	    print $_->match; # assuming you used the /p flag
 	}
 
+	re_matches ( ... ) or warn 'no matches';
+	# which is easier than using while, which doesn't allow or/else
 
 =head1 FUNCTIONS
 
@@ -89,7 +95,7 @@ sub re_matches {
 	my $code = shift;
 	my $flags = 'g';
 	if (!ref $code) {
-		$flags = $code;
+		$flags = $code if defined $code;
 		$code = sub {};
 	}
 	elsif (@_) {
@@ -101,7 +107,9 @@ sub re_matches {
 		$results = Regexp::Flow::Results->new;
 	}
 	my $action = sub {
-	    	my $rfr = shift;
+		my $rfr = shift;
+		$rfr->string($string);
+		$rfr->re($re);
 		if (defined $results) {
 			push @{$results->contents}, $rfr;
 		}
@@ -109,17 +117,24 @@ sub re_matches {
 		$returnvalue;
 	};
 	die unless $flags =~ /^[a-z]+$/;
-	eval qq`
-		while (\$string =~ m/\$re/$flags) {
-	    		my \$rfr = Regexp::Flow::Result->new;
-			\$rfr->string(\$string);
-			\$rfr->re(\$re);
-			\$action->(\$rfr);
-			last if 'last' eq \$rfr->continue_action;
-		}
-	`; #~ we use the string eval to put flags in there.
+	if ($flags =~ m/g/) {
+		eval qq`
+			while (\$string =~ m/\$re/$flags) {
+				my \$rfr = Regexp::Flow::Result->new;
+				\$action->(\$rfr);
+				last if 'last' eq \$rfr->continue_action;
+			}
+		`; #~ we use the string eval to put flags in there.
+	}
+	else {
+		eval qq`
+			\$action->(
+				Regexp::Flow::Result->new
+			) if \$string =~ m/\$re/$flags;
+		`;
+	}
 	if ($@) {
-		warn ($@);
+		die ($@);
 	}
 	return $results;
 }
