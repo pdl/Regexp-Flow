@@ -160,6 +160,19 @@ untouched and the return value will be the modified string.
 
 If flags are not provided, C<g> is assumed.
 
+=head4 last
+
+	my $line = 'h=65;w=32;x=4;y=3';
+	my $h, $w; # we don't care about anything else
+	re_substitutons( $line, qr/(\w+)=(\d+);/, sub{
+		my $rfr = shift;
+		$h = $rfr->c(2) if ($rfr->c(1) eq 'h')
+		$w = $rfr->c(2) if ($rfr->c(1) eq 'w')
+		$rfr->last if defined $h and defined $w;
+		return '';
+	});
+	# $line is now 'x=4;y=3'
+
 If the C<continue_action> of the result object is set to C<last>,
 the substitutions will cease. (The regular expression you supply is
 wrapped in another which intervenes and guarantees no further matches
