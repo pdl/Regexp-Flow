@@ -160,6 +160,11 @@ untouched and the return value will be the modified string.
 
 If flags are not provided, C<g> is assumed.
 
+If the C<continue_action> of the result object is set to C<last>,
+the substitutions will cease. (The regular expression you supply is
+wrapped in another which intervenes and guarantees no further matches
+will occur if a C<$last> variable has been set).
+
 =cut
 
 sub re_substitutions {
@@ -185,18 +190,18 @@ sub re_substitutions {
 	};
 	die ('Unexpected flags [a-z] only permitted in '.$flags)
 		unless $flags =~ /^[a-z]+$/;
+
+	my $actual_re = qr/(?(?{$last})(?!)|$re)/;
+	#~ if last is set, evalute the never-matching regexp.
+	#~ Otherwise evaluate the regexp given.
+
 	#~ In the following code, We will be using s~~~e
 	eval qq`
-		\$string =~ s~\$re~
+		\$string =~ s~\$actual_re~
     			my \$rfr = Regexp::Flow::Result->new;
 			\$rfr->string(\$string);
 			\$rfr->re(\$re);
-			if (!\$last) {
-				\$action->(\$rfr);
-			}
-			else {
-			    \$rfr->match;
-			}
+			\$action->(\$rfr);
 		~e$flags
 	`; #~ we use the string eval to put flags in there.
 	if ($@) {

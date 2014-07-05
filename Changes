@@ -1,5 +1,6 @@
 Unreleased Changes
 		Fixed gh #1 by skipping over known bugs in 5.18.0-.1
+		Fixed a bug where if the p flag was not set and last was called, all further matches would be replaced with the empty string
 
 0.002	2014-06-29
 		re_matches now works with no /g flag

@@ -18,6 +18,16 @@ is($count,1, 'last works');
 
 ok (re_matches ('a', 'A', 'i'), 'i flag works');
 my $results;
+{
+	$count = 0;
+	$results = re_matches ('abcd', qr/\w/, sub{
+		$count++;
+		my $rr = shift;
+		$rr->last if $count == 3;
+	}, 'g');
+	is($count,3, 'last+flags works');
+	ok ($results == 3, 'results numerically equals ok');
+}
 SKIP: {
 	skip 'Unpatched 5.18.0-.1 breaks /p' if $p_flag_broken;
 	$count = 0;
@@ -26,7 +36,7 @@ SKIP: {
 		my $rr = shift;
 		$rr->last if $rr->match eq 'c';
 	}, 'pg'); #~ this appears to fail on perl 5.18.0 and 5.18.1
-	is($count,3, 'last+flags works');
+	is($count,3, 'last+flags+pflag works');
 	ok ($results == 3, 'results numerically equals ok');
 }
 $results = re_matches ('foo','bar');
@@ -38,15 +48,27 @@ subtest substitutions => sub {
 my $count = 0;
 my $string = 'abcd';
 my $results;
+{
+	$results = re_substitutions ($string, qr/\w/, sub{
+		$count++;
+		my $rr = shift;
+		$rr->last if $count == 3;
+		'x';
+	}, 'g');
+	is($count, 3, 'last+flags works');
+	is($string, 'xxxd', 'modified string');
+}
 SKIP:{
 	skip 'Unpatched 5.18.0-.1 breaks /p' if $p_flag_broken;
+	$count = 0;
+	$string = 'abcd';
 	$results = re_substitutions ($string, qr/\w/, sub{
 		$count++;
 		my $rr = shift;
 		$rr->last if $rr->match eq 'c';
 		'x';
 	}, 'pg');
-	is($count, 3, 'last+flags works');
+	is($count, 3, 'last+flags+pflag works');
 	is($string, 'xxxd', 'modified string');
 }
 };
